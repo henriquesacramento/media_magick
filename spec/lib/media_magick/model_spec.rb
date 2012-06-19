@@ -54,6 +54,8 @@ describe MediaMagick::Model do
       end
 
       it '' do
+        @instance.save
+
         video = @instance.photos_and_videos.create(video: 'youtube.com/watch?v=FfUHkPf9D9k')
 
         video.type.should eq('video')

@@ -38,6 +38,34 @@ describe MediaMagick::Model do
       end
     end
 
+    describe 'allow_videos' do
+      subject { @instance.photos_and_videos.new }
+
+      it '' do
+        subject.fields.should include('type')
+      end
+
+      it '' do
+        subject.fields.should include('video')
+      end
+
+      it '' do
+        subject.should respond_to(:photos_and_video)
+      end
+
+      it '' do
+        video = @instance.photos_and_videos.create(video: 'youtube.com/watch?v=FfUHkPf9D9k')
+
+        video.type.should eq('video')
+
+        video.url.should eq("/uploads/album_photos_and_videos/photos_and_video/#{video.id}/FfUHkPf9D9k.jpg")
+        video.thumb.url.should eq("/uploads/album_photos_and_videos/photos_and_video/#{video.id}/thumb_FfUHkPf9D9k.jpg")
+        video.source.should eq('<iframe width="560" height="315" src="http://www.youtube.com/embed/FfUHkPf9D9k" frameborder="0" allowfullscreen></iframe>')
+
+        video.source(width: 156, height: 88).should eq('<iframe width="156" height="88" src="http://www.youtube.com/embed/FfUHkPf9D9k" frameborder="0" allowfullscreen></iframe>')
+      end
+    end
+
     describe '#photos' do
       subject { @instance.photos.new }
 

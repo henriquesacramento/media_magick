@@ -11,6 +11,8 @@ module MediaMagick
         attaches_block = block_given? ? Proc.new : nil
 
         name_camelcase = create_attaches_class(name, options, attaches_block) do
+          create_video_methods(name) if options[:allow_videos]
+
           field :priority, type: Integer, default: 0
 
           default_scope asc(:priority)
@@ -25,6 +27,8 @@ module MediaMagick
         attaches_block = block_given? ? Proc.new : nil
 
         name_camelcase = create_attaches_class(name, options, attaches_block) do
+          create_video_methods(name) if options[:allow_videos]
+
           embedded_in(name)
         end
 
@@ -37,6 +41,36 @@ module MediaMagick
         klass = Class.new do
           include Mongoid::Document
           extend CarrierWave::Mount
+
+          field :type, type: String, default: options[:as] || 'image'
+
+          def self.create_video_methods(name)
+            field :video, type: String
+
+            def video=(url)
+              self.type = 'video'
+              super
+
+              require 'net/http'
+
+              id = url.match(/youtube.com\/watch\?v=(.*)/)[1]
+
+              Net::HTTP.start( 'img.youtube.com' ) { |http|
+                resp = http.get( "/vi/#{id}/0.jpg" )
+
+                open( "/tmp/#{id}.jpg", 'wb' ) { |file|
+                  file.write(resp.body)
+                }
+              }
+
+              photos_and_video.store!(File.new("/tmp/#{id}.jpg"))
+            end
+
+            def source(options = {})
+              id = video.match(/youtube.com\/watch\?v=(.*)/)[1]
+              "<iframe width=\"#{ options[:width] || 560}\" height=\"#{ options[:height] || 315 }\" src=\"http://www.youtube.com/embed/#{id}\" frameborder=\"0\" allowfullscreen></iframe>"
+            end
+          end
 
           class_eval(&block) if block_given?
 

@@ -53,22 +53,70 @@ module MediaMagick
 
               require 'net/http'
 
-              id = url.match(/youtube.com\/watch\?v=(.*)/)[1]
+              site = nil
 
-              Net::HTTP.start( 'img.youtube.com' ) { |http|
-                resp = http.get( "/vi/#{id}/0.jpg" )
+              if id_regex = url.match(/youtube.com\/watch\?v=(.*)/)
+                site = 'youtube'
+              else
+                if id_regex = url.match(/vimeo.com\/(.*)/)
+                  site = 'vimeo'
+                end
+              end
 
-                open( "/tmp/#{id}.jpg", 'wb' ) { |file|
-                  file.write(resp.body)
+              id = id_regex[1]
+
+              if site == 'youtube'
+                Net::HTTP.start( 'img.youtube.com' ) { |http|
+                  resp = http.get( "/vi/#{id}/0.jpg" )
+
+                  open( "/tmp/#{id}.jpg", 'wb' ) { |file|
+                    file.write(resp.body)
+                  }
                 }
-              }
+              else
+                if site == 'vimeo'
+                  Net::HTTP.start( 'vimeo.com' ) do |http|
+                    resp = http.get( "/api/v2/video/#{id}.json" )
 
-              photos_and_video.store!(File.new("/tmp/#{id}.jpg"))
+                    require 'json'
+                    require "net/http"
+                    require "uri"
+
+                    image_url = JSON.parse(resp.body)[0]["thumbnail_large"]
+
+                    uri = URI.parse(image_url)
+                    response = Net::HTTP.get_response(uri)
+
+                    open( "/tmp/#{id}.jpg", 'wb' ) { |file|
+                      file.write(response.body)
+                    }
+                  end
+                end
+              end
+
+              send(self.class::ATTACHMENT).store!(File.new("/tmp/#{id}.jpg"))
             end
 
             def source(options = {})
-              id = video.match(/youtube.com\/watch\?v=(.*)/)[1]
-              "<iframe width=\"#{ options[:width] || 560}\" height=\"#{ options[:height] || 315 }\" src=\"http://www.youtube.com/embed/#{id}\" frameborder=\"0\" allowfullscreen></iframe>"
+              site = nil
+
+              if id_regex = video.match(/youtube.com\/watch\?v=(.*)/)
+                site = 'youtube'
+              else
+                if id_regex = video.match(/vimeo.com\/(.*)/)
+                  site = 'vimeo'
+                end
+              end
+
+              id = id_regex[1]
+
+              if site == 'youtube'
+                "<iframe width=\"#{ options[:width] || 560}\" height=\"#{ options[:height] || 315 }\" src=\"http://www.youtube.com/embed/#{id}\" frameborder=\"0\" allowfullscreen></iframe>"
+              else
+                if site == 'vimeo'
+                  "<iframe src=\"http://player.vimeo.com/video/#{id}?title=0&byline=0&portrait=0\" width=\"#{ options[:width] || 500 }\" height=\"#{ options[:height] || 341 }\" frameborder=\"0\" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>"
+                end
+              end
             end
           end
 

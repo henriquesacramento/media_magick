@@ -66,6 +66,19 @@ describe MediaMagick::Model do
 
         video.source(width: 156, height: 88).should eq('<iframe width="156" height="88" src="http://www.youtube.com/embed/FfUHkPf9D9k" frameborder="0" allowfullscreen></iframe>')
       end
+
+      it '' do
+        @instance.save
+
+        video = @instance.photos_and_videos.create(video: 'vimeo.com/43401461')
+
+        video.type.should eq('video')
+
+        video.url.should eq("/uploads/album_photos_and_videos/photos_and_video/#{video.id}/43401461.jpg")
+        video.thumb.url.should eq("/uploads/album_photos_and_videos/photos_and_video/#{video.id}/thumb_43401461.jpg")
+        video.source.should eq('<iframe src="http://player.vimeo.com/video/43401461?title=0&byline=0&portrait=0" width="500" height="341" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>')
+        video.source(width: 156, height: 88).should eq('<iframe src="http://player.vimeo.com/video/43401461?title=0&byline=0&portrait=0" width="156" height="88" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>')
+      end
     end
 
     describe '#photos' do

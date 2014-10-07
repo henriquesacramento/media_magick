@@ -7,10 +7,10 @@ module MediaMagick
 
     def create
       if !params[:embedded_in_model].blank?
-        embedded_in = params[:embedded_in_model].constantize.find(params[:embedded_in_id])
-        obj = embedded_in.send(params[:model].pluralize.downcase).find(params[:id])
+        embedded_in = params[:embedded_in_model].constantize.find(Moped::BSON::ObjectId(params[:embedded_in_id]))
+        obj = embedded_in.send(params[:model].pluralize.downcase).find(Moped::BSON::ObjectId(params[:id]))
       else
-        obj = params[:model].constantize.find(params[:id])
+        obj = params[:model].constantize.find(Moped::BSON::ObjectId(params[:id]))
       end
 
       if params[:video]
@@ -28,9 +28,9 @@ module MediaMagick
 
     def destroy
       if !params[:embedded_in_model].blank?
-        attachment = params[:embedded_in_model].classify.constantize.find(params[:embedded_in_id]).send(params[:model].pluralize.downcase).find(params[:id]).send(params[:relation].pluralize).find(params[:relation_id])
+        attachment = params[:embedded_in_model].classify.constantize.find(Moped::BSON::ObjectId(params[:embedded_in_id])).send(params[:model].pluralize.downcase).find(Moped::BSON::ObjectId(params[:id])).send(params[:relation].pluralize).find(Moped::BSON::ObjectId(params[:relation_id]))
       else
-        attachment = params[:model].classify.constantize.find(params[:id]).send(params[:relation].pluralize).find(params[:relation_id])
+        attachment = params[:model].classify.constantize.find(Moped::BSON::ObjectId(params[:id])).send(params[:relation].pluralize).find(Moped::BSON::ObjectId(params[:relation_id]))
       end
 
       attachment.destroy
@@ -44,7 +44,7 @@ module MediaMagick
       doc = find_doc_by_params(params)
 
       attachments.each_with_index do |id, i|
-        attachment = doc.send(params[:relation]).find(id)
+        attachment = doc.send(params[:relation]).find(Moped::BSON::ObjectId(id))
         attachment.priority = i
         attachment.save
       end

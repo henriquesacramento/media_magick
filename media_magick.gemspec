@@ -16,10 +16,10 @@ Gem::Specification.new do |gem|
   gem.version       = MediaMagick::VERSION
   gem.license       = 'MIT'
 
-  gem.add_dependency 'carrierwave',    '~> 0.9.0'
+  gem.add_dependency 'carrierwave'
   # gem.add_dependency 'mongoid',        '>= 2.7.0'
   gem.add_dependency 'plupload-rails', '~> 1.1.0'
-  gem.add_dependency 'rails',          '~> 4.0.0'
+  gem.add_dependency 'rails',          '~> 4.2.5'
   gem.add_dependency 'mini_magick',    '~> 3.6.0'
 
   gem.add_development_dependency 'rake',         '~> 10.1.0'

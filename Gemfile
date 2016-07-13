@@ -2,5 +2,5 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem 'mongoid', github: 'mongoid/mongoid'
+gem 'mongoid'
 gem 'jquery-rails'
